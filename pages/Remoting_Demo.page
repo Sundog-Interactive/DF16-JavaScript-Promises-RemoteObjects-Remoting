@@ -1,15 +1,10 @@
-<apex:page >
-  <apex:remoteObjects jsNamespace="Sfdc">
-    <apex:remoteObjectModel name="Account" fields="Id,Name">
-      
-    </apex:remoteObjectModel>
-  </apex:remoteObjects>
+<apex:page controller="Remoting_Demo_Controller">
   <h1>Accounts</h1>
-  <div id="error">
+  <div id="errors">
     
   </div>
   <div id="accounts">
-    Loading ...
+    Loading...
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/q.js/1.4.1/q.min.js" type="text/javascript"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js" type="text/javascript"></script>
@@ -46,26 +41,23 @@
   </script>
   <script type="text/javascript">
     Q.Promise(function(resolve, reject, notify) {
-      var x = new Sfdc.Account();
-      
-      //https://developer.salesforce.com/docs/atlas.en-us.pages.meta/pages/pages_remote_objects_using_retrieve_query_object.htm
-      var criteria = {};
-      
-      //https://developer.salesforce.com/docs/atlas.en-us.pages.meta/pages/pages_remote_objects_callback_functions.htm
-      var callback = function(error, results, event) {
-        if (error) {
-          reject(error.message);
+      var callback = function(result, event) {
+        //https://developer.salesforce.com/docs/atlas.en-us.pages.meta/pages/pages_js_remoting_handling_response.htm#pages_js_remoting_handling_response
+        if (event.status) {
+          resolve(result);
           
         } else {
-          resolve(results);
+          reject(event.message);
           
         }
-        
-      }
+  
+      };
       
-      x.retrieve(criteria, callback);
+      //https://developer.salesforce.com/docs/atlas.en-us.pages.meta/pages/pages_js_remoting_invoking.htm
+      Remoting_Demo_Controller.getAccounts(callback);
       
     }).catch(function(reason) {
+      console.log(reason);
       var source = document.getElementById('errors-template').innerHTML;
       var template = Handlebars.compile(source);
       var context = {'error': reason};
@@ -78,8 +70,8 @@
       if (Array.isArray(records)) {
         records.forEach(function(record) {
           accounts.push({
-            'id':record.get('Id'),
-            'name':record.get('Name')
+            'id':record.Id,
+            'name':record.Name
           })
         });
         
