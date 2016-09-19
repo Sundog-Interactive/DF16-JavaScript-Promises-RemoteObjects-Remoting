@@ -1,23 +1,36 @@
 <apex:page >
+  <!-- https://developer.salesforce.com/docs/atlas.en-us.pages.meta/pages/pages_compref_remoteObjects.htm -->
+  <!-- Specify which sObjects to access using Visualforce Remote Objects and what JavaScript namespace to access them from -->
   <apex:remoteObjects jsNamespace="Sfdc">
+    <!-- https://developer.salesforce.com/docs/atlas.en-us.pages.meta/pages/pages_compref_remoteObjectModel.htm -->
+    <!-- Specify a specific sObject and which of it's fields to access using Visualforce Remote Objects-->
     <apex:remoteObjectModel name="Account" fields="Id,Name">
-      
     </apex:remoteObjectModel>
   </apex:remoteObjects>
   <h1>Accounts</h1>
+  <!-- A DIV to render error messages to -->
   <div id="error">
     
   </div>
+  
+  <!-- A DIV to hold the Accounts we retrieve from Visualforce Remote Objects -->
   <div id="accounts">
     Loading ...
   </div>
+  
+  <!-- q, A promise library for JavaScript -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/q.js/1.4.1/q.min.js" type="text/javascript"></script>
+  <!-- HandlebarsJS, client-side templating -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js" type="text/javascript"></script>
+  
+  <!-- HandlebarsJS template to render error messages -->
   <script id="errors-template" type="text/x-handlebars-template">
     {{#if error}}
       <p><b>Error:</b> {{error}}</p>
     {{/if}}
   </script>
+  
+  <!-- HandlebarsJS template to render Account records -->
   <script id="accounts-table-template" type="text/x-handlebars-template">
     <table>
       <thead>
@@ -44,28 +57,38 @@
       </div>
     </div>
   </script>
+  
   <script type="text/javascript">
+    //Instantiate a new Promise using the q framework; we're passing the function that is going retireve our Account records using Visualforce Remote Objects.
     Q.Promise(function(resolve, reject, notify) {
-      var x = new Sfdc.Account();
+      //Instantiate an instance of the Account Visualforce Remote Object model we declared earlier.
+      var vro = new Sfdc.Account();
       
       //https://developer.salesforce.com/docs/atlas.en-us.pages.meta/pages/pages_remote_objects_using_retrieve_query_object.htm
+      //Define any query criteria we'd like tp pass to the retrieve call
       var criteria = {};
       
       //https://developer.salesforce.com/docs/atlas.en-us.pages.meta/pages/pages_remote_objects_callback_functions.htm
+      //Define the callback function to the retrieve call that'll run once the call is complete
       var callback = function(error, results, event) {
+        //Check for any error from the retrieve call
         if (error) {
+          //Pass the error from the retrieve call to the Promise's reject handler; this will trigger the handler attached using the .catch function.
           reject(error.message);
           
         } else {
+          //Pass the results from the retrieve call to the Promise's resolved handler; this will trigger the handler(s) attached using the .then function.
           resolve(results);
           
         }
         
       }
-      
-      x.retrieve(criteria, callback);
+
+      //Retrieve the records from Salesforce      
+      vro.retrieve(criteria, callback);
       
     }).catch(function(reason) {
+      //Error handling for the Promise. We're using HandlebarsJS to generate and render the markup for the errors.
       var source = document.getElementById('errors-template').innerHTML;
       var template = Handlebars.compile(source);
       var context = {'error': reason};
@@ -73,6 +96,8 @@
       document.getElementById('errors').innerHTML = html;
         
     }).then(function(records) {
+      //First success handler. Here were normalizing the Visualforce Remote Objects into plain old JavaScript objects.
+      
       var accounts = [];
       
       if (Array.isArray(records)) {
@@ -88,6 +113,7 @@
       return accounts;
       
     }).then(function(accounts) {
+      //Second success handler. Using the plain old JavaScript objects from the previous success handler, we're using HandlebarsJS to generate and render the markup for them.
         var source = document.getElementById('accounts-table-template').innerHTML;
         var template = Handlebars.compile(source);
         var context = {'accounts': accounts};
