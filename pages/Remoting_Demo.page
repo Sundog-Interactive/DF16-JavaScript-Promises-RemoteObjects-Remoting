@@ -42,16 +42,10 @@
         {{/each}}
       </tbody>
     </table>
-    <div class="entry">
-      <h1>{{title}}</h1>
-      <div class="body">
-        {{body}}
-      </div>
-    </div>
   </script>
   <script type="text/javascript">
     //Instantiate a new Promise using the q framework; we're passing the function that is going retireve our Account records using JavaScript remoting.
-    Q.Promise(function(resolve, reject, notify) {
+    Q.Promise(function(resolve, reject) {
       
       //Define the callback function to the JavaScript remoting call that'll run once the call is complete
       var callback = function(result, event) {

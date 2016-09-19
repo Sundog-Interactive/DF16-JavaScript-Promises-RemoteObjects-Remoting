@@ -50,17 +50,11 @@
         {{/each}}
       </tbody>
     </table>
-    <div class="entry">
-      <h1>{{title}}</h1>
-      <div class="body">
-        {{body}}
-      </div>
-    </div>
   </script>
   
   <script type="text/javascript">
     //Instantiate a new Promise using the q framework; we're passing the function that is going retireve our Account records using Visualforce Remote Objects.
-    Q.Promise(function(resolve, reject, notify) {
+    Q.Promise(function(resolve, reject) {
       //Instantiate an instance of the Account Visualforce Remote Object model we declared earlier.
       var vro = new Sfdc.Account();
       
