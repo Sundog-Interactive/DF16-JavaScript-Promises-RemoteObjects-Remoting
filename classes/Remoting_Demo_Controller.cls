@@ -4,16 +4,11 @@ global class Remoting_Demo_Controller {
     
     @RemoteAction
     global static Account[] getAccounts() {
-        throw new RemotingDemoControllerException('Error!');
-        
         Account[] accounts = new Account[]{};
         
-        accounts = [SELECT Id, Name FROM Account];
+        accounts = [SELECT Id, Name, NumberofLocations__c FROM Account ORDER BY Name LIMIT 5];
         
         return accounts;
     }
-    
-    class RemotingDemoControllerException extends Exception{}
-
     
 }
